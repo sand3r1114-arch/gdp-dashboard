@@ -1,8 +1,16 @@
 # 🏠 Thuis dashboard
 
-Een dashboard van je huis: scan je wifi, zie welke apparaten er verbonden zijn,
-geef ze een naam en deel ze in per kamer. Nieuwe of onbekende apparaten springen
-er meteen uit.
+Een dashboard van je huis, met alles op één scherm:
+
+| Pagina | Wat | Koppeling |
+|---|---|---|
+| 🏠 **Overzicht** | Het belangrijkste van alles hieronder | |
+| ⚡ **Energie** | Stroom nu, gas en stroom per uur/dag, kosten | HomeWizard P1-meter (lokaal) |
+| 🌡️ **Verwarming** | Binnen- en buitentemperatuur, ketel, warm water | Viessmann ViCare-API |
+| 💡 **Lampen** | Aan/uit en dimmen, per kamer | WiZ (lokaal, geen account) |
+| 📷 **Camera's** | Stilstaand beeld dat elke 10 seconden ververst | RTSP (bijv. eufy) |
+| 📡 **Netwerk** | Welke apparaten er op je wifi zitten | Eigen netwerkscan |
+| 🌤️ **Weer** (op Overzicht) | Temperatuur en verwachting | Open-Meteo (gratis) |
 
 ## Starten
 
@@ -29,12 +37,32 @@ pip install -r requirements.txt
 streamlit run streamlit_app.py
 ```
 
-Het dashboard opent in je browser. Klik links op **🔍 Scan nu**. Een scan duurt
-meestal 10 tot 60 seconden.
+## Instellen
 
-Wil je eerst rondkijken? Zet dan **Voorbeeldgegevens tonen** aan.
+Ga in het dashboard naar **⚙️ Instellingen**. Daar staat per onderdeel wat je
+moet doen. Kort samengevat:
 
-## Wat je ziet
+- **Woonplaats:** vul je woonplaats in voor het weer.
+- **HomeWizard P1-meter:** zet in de HomeWizard Energy-app de lokale API aan
+  (*Instellingen → Meters → je P1-meter → Lokale API*). Klik daarna op
+  **Zoek automatisch**. Het dashboard slaat elke minuut een meting op zolang het
+  draait, dus de grafieken vullen zich vanzelf.
+- **Energieprijzen:** optioneel, voor de kosten in euro's.
+- **Viessmann:** maak eenmalig een gratis client-ID aan op
+  https://app.developer.viessmann.com/. De stappen staan bij Instellingen. Het
+  dashboard haalt elk kwartier gegevens op, ruim binnen de daglimiet van het
+  gratis abonnement.
+- **WiZ-lampen:** die worden vanzelf gevonden. Zet in de WiZ-app wel
+  *Instellingen → Beveiliging → Lokale communicatie toestaan* aan.
+- **eufy-camera's:** zet per camera in de eufy Security-app **NAS (RTSP)** aan
+  (*camera → Instellingen → Opslag*). Plak daarna het `rtsp://`-adres op de
+  pagina Camera's. Niet elke eufy-deurbel ondersteunt RTSP; batterijmodellen
+  meestal niet.
+
+## Netwerk
+
+Klik op de pagina **📡 Netwerk** op **🔍 Scan nu**. Een scan duurt meestal 10
+tot 60 seconden. Wil je eerst rondkijken? Zet dan **Voorbeeldgegevens tonen** aan.
 
 - **Per kamer**: alle apparaten gegroepeerd per kamer, online 🟢 of offline ⚪.
 - **Alle apparaten**: een tabel waarin je een naam en kamer kiest en apparaten
@@ -75,8 +103,16 @@ Windows, macOS en Linux. Vanaf de opdrachtregel kan het ook:
 
 ## Privacy
 
-Namen, kamers en scanresultaten staan alleen lokaal in de map `thuis_data/`.
-Die map staat in `.gitignore`, dus hij komt niet op GitHub terecht.
+Alles staat alleen lokaal in de map `thuis_data/`: namen, kamers,
+scanresultaten, verbruiksgeschiedenis (`verbruik.sqlite`) en instellingen. Dat
+geldt ook voor je Viessmann-wachtwoord en je camera-adressen, en die worden
+**niet versleuteld** opgeslagen. Deel die map dus niet. Hij staat in
+`.gitignore`, dus hij komt niet op GitHub terecht.
+
+Gestart met `start.bat` luistert het dashboard alleen op deze computer
+(`localhost`), dus andere apparaten in huis kunnen er niet bij. Start je het
+handmatig met `streamlit run`, voeg dan `--server.address localhost` toe voor
+hetzelfde effect.
 
 ## Tests
 

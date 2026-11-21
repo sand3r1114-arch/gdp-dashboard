@@ -22,13 +22,14 @@ import json
 import platform
 import re
 import socket
-import ssl
 import subprocess
 import time
 import urllib.request
 import uuid
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
+
+from integrations.http import ssl_context
 
 SYSTEM = platform.system()  # "Windows", "Darwin" (macOS) of "Linux"
 
@@ -489,23 +490,10 @@ def load_oui_db(path: Path) -> dict[str, str]:
         return {}
 
 
-def _ssl_context() -> ssl.SSLContext:
-    """Gebruik de certificaten van het besturingssysteem (truststore).
-
-    Virusscanners en bedrijfsnetwerken die HTTPS inspecteren zetten hun eigen
-    certificaat in Windows; met truststore vertrouwt Python dat net als je browser.
-    """
-    try:
-        import truststore
-        return truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    except ImportError:
-        return ssl.create_default_context()
-
-
 def download_oui_db(path: Path, timeout: float = 30.0) -> int:
     """Download de nieuwste lijst met MAC-fabrikanten en sla hem op. Geeft het aantal regels."""
     errors = []
-    context = _ssl_context()
+    context = ssl_context()
     for kind, url in OUI_SOURCES:
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (thuis-dashboard)"})
