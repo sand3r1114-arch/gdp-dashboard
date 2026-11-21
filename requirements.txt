@@ -1,2 +1,6 @@
 streamlit
 pandas
+netaddr
+truststore
+opencv-python-headless
+PyViCare
