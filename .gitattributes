@@ -1,0 +1,2 @@
+# Windows-scripts moeten CRLF-regeleinden houden
+*.bat -text

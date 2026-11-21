@@ -9,6 +9,21 @@ er meteen uit.
 Draai dit op een computer die **met je thuiswifi verbonden is**. Een online
 server, zoals Streamlit Cloud, kan je thuisnetwerk niet zien.
 
+### Windows: dubbelklik op `start.bat`
+
+1. Download de code als zip (op GitHub: **Code → Download ZIP**) en pak hem
+   helemaal uit.
+2. Dubbelklik op **`start.bat`**. Krijg je een blauw venster *"Windows heeft uw
+   pc beschermd"*? Klik dan op **Meer informatie → Toch uitvoeren**.
+3. De eerste keer installeert het script alles: zo nodig Python (via winget) en
+   de benodigde pakketten. Dat duurt een paar minuten. Daarna opent het
+   dashboard in je browser op http://localhost:8501.
+
+Laat het zwarte venster open zolang je het dashboard gebruikt. Sluit het om te
+stoppen.
+
+### Mac / Linux, of handmatig
+
 ```bash
 pip install -r requirements.txt
 streamlit run streamlit_app.py
