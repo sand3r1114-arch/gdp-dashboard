@@ -43,8 +43,10 @@ Wil je eerst rondkijken? Zet dan **Voorbeeldgegevens tonen** aan.
   netwerkgegevens.
 - **Kamers beheren**: de lijst met kamers aanpassen.
 
-Klik in de zijbalk op **Download fabrikantenlijst**. Dan zie je ook van welk merk
-elk apparaat is (eenmalig, ongeveer 5 MB).
+Van welk merk een apparaat is (Apple, Samsung, Philips…) zie je meteen. De
+officiële IEEE-lijst met fabrikanten zit ingebouwd, via het pakket `netaddr`.
+Met **Nieuwste lijst downloaden** in de zijbalk haal je optioneel de
+allernieuwste versie op.
 
 ## Hoe de scan werkt
 

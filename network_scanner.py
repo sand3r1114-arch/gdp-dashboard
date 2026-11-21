@@ -22,6 +22,7 @@ import json
 import platform
 import re
 import socket
+import ssl
 import subprocess
 import time
 import urllib.request
@@ -199,10 +200,21 @@ def parse_oui_manuf(text: str) -> dict[str, str]:
     return out
 
 
-def lookup_vendor(mac: str | None, oui_db: dict[str, str]) -> str | None:
-    if not mac or not oui_db or is_randomized_mac(mac):
+def builtin_vendor(mac: str) -> str | None:
+    """Fabrikant uit de IEEE-lijst die in het pakket netaddr is ingebouwd (geen download nodig)."""
+    try:
+        from netaddr import EUI
+        return EUI(mac).oui.registration().org.strip() or None
+    except Exception:  # noqa: BLE001 - niet geregistreerd, of netaddr niet geinstalleerd
         return None
-    return oui_db.get(normalize_mac(mac).replace(":", "")[:6])
+
+
+def lookup_vendor(mac: str | None, oui_db: dict[str, str] | None = None) -> str | None:
+    """Zoek de fabrikant: eerst in een eventueel gedownloade lijst, anders in de ingebouwde."""
+    if not mac or is_randomized_mac(mac):
+        return None
+    mac = normalize_mac(mac)
+    return (oui_db or {}).get(mac.replace(":", "")[:6]) or builtin_vendor(mac)
 
 
 # Trefwoorden -> (type, icoon). Volgorde is belangrijk: eerste treffer wint.
@@ -477,20 +489,35 @@ def load_oui_db(path: Path) -> dict[str, str]:
         return {}
 
 
+def _ssl_context() -> ssl.SSLContext:
+    """Gebruik de certificaten van het besturingssysteem (truststore).
+
+    Virusscanners en bedrijfsnetwerken die HTTPS inspecteren zetten hun eigen
+    certificaat in Windows; met truststore vertrouwt Python dat net als je browser.
+    """
+    try:
+        import truststore
+        return truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    except ImportError:
+        return ssl.create_default_context()
+
+
 def download_oui_db(path: Path, timeout: float = 30.0) -> int:
-    """Download de lijst met MAC-fabrikanten en sla hem op. Geeft het aantal regels."""
+    """Download de nieuwste lijst met MAC-fabrikanten en sla hem op. Geeft het aantal regels."""
     errors = []
+    context = _ssl_context()
     for kind, url in OUI_SOURCES:
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (thuis-dashboard)"})
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
+            with urllib.request.urlopen(req, timeout=timeout, context=context) as resp:
                 text = resp.read().decode("utf-8", errors="replace")
             db = parse_oui_ieee_csv(text) if kind == "ieee" else parse_oui_manuf(text)
             if len(db) > 1000:
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text(json.dumps(db), encoding="utf-8")
                 return len(db)
-            errors.append(f"{url}: te weinig regels ({len(db)})")
+            start = " ".join(text[:80].split())
+            errors.append(f"{url}: onverwachte inhoud ({len(db)} regels herkend), begint met: {start!r}")
         except Exception as exc:  # noqa: BLE001 - we proberen gewoon de volgende bron
             errors.append(f"{url}: {exc}")
     raise RuntimeError("Kon fabrikantenlijst niet downloaden:\n" + "\n".join(errors))

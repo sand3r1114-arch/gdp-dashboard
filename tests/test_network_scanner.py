@@ -72,6 +72,13 @@ def test_oui_parsers_and_lookup():
     assert ns.lookup_vendor("ba:7e:21:0c:9d:12", db) is None  # privé-MAC heeft geen fabrikant
 
 
+def test_builtin_vendor_without_download():
+    assert ns.lookup_vendor("00:11:32:aa:bb:cc") == "Synology Incorporated"
+    assert "AVM" in ns.lookup_vendor("3c:a6:2f:11:22:33", {})
+    assert ns.lookup_vendor("3c:a6:2f:11:22:33", {"3ca62f": "AVM GmbH"}) == "AVM GmbH"  # download wint
+    assert ns.guess_device_type(None, ns.lookup_vendor("3c:a6:2f:11:22:33"))[0].startswith("Netwerk")
+
+
 def test_guess_device_type():
     assert ns.guess_device_type(None, None, is_gateway=True)[0] == "Router"
     assert ns.guess_device_type(None, None, [62078])[0] == "iPhone / iPad"

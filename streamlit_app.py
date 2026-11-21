@@ -77,10 +77,11 @@ with st.sidebar:
     st.subheader("🏭 Fabrikantenlijst")
     oui_db = ns.load_oui_db(hs.OUI_FILE)
     if oui_db:
-        st.caption(f"✅ {len(oui_db):,} fabrikanten geladen.".replace(",", "."))
+        st.caption(f"✅ Gedownloade lijst met {len(oui_db):,} fabrikanten, aangevuld met de ingebouwde lijst.".replace(",", "."))
     else:
-        st.caption("Nog niet gedownload. Hiermee zie je van welk merk een apparaat is (Apple, Samsung, Philips…).")
-    if st.button("⬇️ Download / bijwerken", use_container_width=True):
+        st.caption("✅ Ingebouwde lijst actief: je ziet al van welk merk apparaten zijn. "
+                   "Downloaden is optioneel en geeft alleen de allernieuwste merken.")
+    if st.button("⬇️ Nieuwste lijst downloaden", use_container_width=True):
         with st.spinner("Downloaden (± 5 MB)…"):
             try:
                 n = ns.download_oui_db(hs.OUI_FILE)
