@@ -9,6 +9,11 @@ chcp 65001 >nul
 title Thuis dashboard
 cd /d "%~dp0"
 
+rem De Python-werkmap staat op een kort pad: Windows staat standaard maar 260
+rem tekens per bestandspad toe en Streamlit bevat diep geneste mappen.
+set "VENV=%LOCALAPPDATA%\ThuisDashboard\venv"
+set "VPY=%VENV%\Scripts\python.exe"
+
 echo.
 echo   === Thuis dashboard ===
 echo.
@@ -20,7 +25,7 @@ if not exist "streamlit_app.py" (
 )
 
 rem ---- 1. Al geinstalleerd? Dan meteen door. ---------------------------
-if exist ".venv\Scripts\python.exe" goto :packages
+if exist "%VPY%" goto :packages
 
 rem ---- 2. Python zoeken -------------------------------------------------
 call :findpython
@@ -37,20 +42,20 @@ if not defined PY goto :nopython
 :makevenv
 echo.
 echo   Eenmalige installatie: werkmap voor Python maken...
-%PY% -m venv .venv
+if not exist "%LOCALAPPDATA%\ThuisDashboard" mkdir "%LOCALAPPDATA%\ThuisDashboard"
+%PY% -m venv "%VENV%"
 if errorlevel 1 goto :fail
 
 rem ---- 3. Pakketten installeren als dat nog niet (opnieuw) gebeurd is --
 :packages
-set "VPY=.venv\Scripts\python.exe"
-fc /b requirements.txt .venv\requirements.installed >nul 2>&1
+fc /b requirements.txt "%VENV%\requirements.installed" >nul 2>&1
 if not errorlevel 1 goto :run
 echo.
 echo   Pakketten installeren. De eerste keer duurt dit een paar minuten...
 "%VPY%" -m pip install --disable-pip-version-check -q --upgrade pip
 "%VPY%" -m pip install --disable-pip-version-check -r requirements.txt
 if errorlevel 1 goto :fail
-copy /y requirements.txt .venv\requirements.installed >nul
+copy /y requirements.txt "%VENV%\requirements.installed" >nul
 
 rem ---- 4. Starten -------------------------------------------------------
 :run
